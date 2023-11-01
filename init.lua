@@ -10,15 +10,15 @@ local cumulativeTime = 0
 local function trim(msg)
   if not msg or not type(msg) == "string" then return "" end
   if string.len(msg) > MAX_MSG_BUBBLE_LENGTH then
-    return string.sub(msg, 1, MAX_MSG_BUBBLE_LENGTH)
+    return string.sub(msg, 1, MAX_MSG_BUBBLE_LENGTH)..".."
   else
     return msg
   end
 end
 
 minetest.register_on_chat_message(function(name, origMessage)
-	if minetest.get_player_privs(name).shout then
-		local player = minetest.get_player_by_name(name)
+  if minetest.get_player_privs(name).shout then
+    local player = minetest.get_player_by_name(name)
     if not player then return end
     local msg = "\n"..MSG_BUBBLE_PREFIX..trim(origMessage)
     local nametag = player:get_nametag_attributes()
@@ -49,7 +49,7 @@ minetest.register_on_chat_message(function(name, origMessage)
     end
     nametag.text = shown[name].text
     player:set_nametag_attributes(nametag)
-	end
+  end
 end)
 
 minetest.register_globalstep(function(dtime)
