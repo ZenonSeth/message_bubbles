@@ -1,4 +1,5 @@
 
 message_bubbles_lifetime (Lifetime for message bubbles, in seconds) int 10 1 600
-message_bubbles_char_limit (Max number of characters to display per message bubble) int 40 5 500
+message_bubbles_char_limit (Max number of characters to display per line of message bubble) int 40 5 500
+message_bubbles_max_num_lines (Max number of lines to display in a message bubble) int 1 1 10
 message_bubbles_prefix (Prefix to show before user message bubble) string Says: 
