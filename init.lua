@@ -8,6 +8,15 @@ local MSG_BUBBLE_PREFIX = settings:get("message_bubbles_prefix") or "Says: "
 
 local cumulativeTime = 0
 
+-- gsub requires escaping of custom characters otherwise the replacement can break
+local function literal(str)
+    return str:gsub("[%(%)%.%%%+%-%*%?%[%^%$%]]", "%%%1")
+end
+
+local function removeEscape(str)
+  return str:gsub("%%", "")
+end
+
 local function trim(msg)
   if not msg or not type(msg) == "string" then return "" end
   if string.len(msg) <= MAX_CHARS_PER_LINE then return msg end
@@ -28,7 +37,6 @@ local function trim(msg)
     if words[wordIndex] then
       tmp = line..space..words[wordIndex]
     else -- we used all the words, return early
-      currLine = MAX_NUM_LINES + 1
       return ret..line
     end
 
@@ -57,6 +65,7 @@ minetest.register_on_chat_message(function(name, origMessage)
     local player = minetest.get_player_by_name(name)
     if not player then return end
     local msg = "\n"..MSG_BUBBLE_PREFIX..trim(origMessage)
+    msg = removeEscape(msg)
     local nametag = player:get_nametag_attributes()
     local nametagText = nametag.text
     local hadToAddName = false
@@ -66,7 +75,7 @@ minetest.register_on_chat_message(function(name, origMessage)
         shown[name].text = name..msg
         shown[name].addedMsg = msg
       else
-        shown[name].text = string.gsub(nametagText, currText, msg)
+        shown[name].text = string.gsub(nametagText, literal(shown[name].addedMsg), msg)
         shown[name].addedMsg = msg
       end
       shown[name].time = minetest.get_gametime()
@@ -75,6 +84,8 @@ minetest.register_on_chat_message(function(name, origMessage)
       if not nametagText or nametagText == "" then
         msg = name..msg
         hadToAddName = true
+      else
+        msg = nametagText..msg
       end
       shown[name] = {
         text = msg,
@@ -101,7 +112,7 @@ minetest.register_globalstep(function(dtime)
           if info.wasEmpty then
             nametag.text = ""
           else
-            nametag.text = string.gsub(nametag.text, info.addedMsg, "")
+            nametag.text = string.gsub(nametag.text, literal(info.addedMsg), "")
           end
           player:set_nametag_attributes(nametag)
         end
